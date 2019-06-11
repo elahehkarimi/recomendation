@@ -1,0 +1,64 @@
+import ast
+from math import sqrt 
+
+users = {}
+with open("F://amazoon.txt") as f:
+    i=1
+    for line in f:
+      try: 
+        line_dict = ast.literal_eval(line)
+        i=i+1
+        if not(line_dict["reviewerName"] in users): 
+            users[line_dict["reviewerName"]] = {}
+        #users[line_dict["reviewerName"]]["reviewerID"] = line_dict["reviewerID"];
+        #users[line_dict["reviewerName"]]["asin"] = line_dict["asin"];
+        #if len(users[line_dict["reviewerName"]])>0 : print(str(i)+"»>"+ str(len(users[line_dict["reviewerName"]])))
+        users[line_dict["reviewerName"]][line_dict["asin"]] = line_dict["overall"]
+      except:
+        pert=i;
+
+   # print(users['Jake'])
+    #print(users)
+
+def manhattan(rating1, rating2):  
+    distance = 0 
+    commonRatings = False  
+    for key in rating1: 
+        if key in rating2: 
+            distance += abs(rating1[key] - rating2[key]) 
+            commonRatings = True 
+    if commonRatings: 
+        return distance 
+    else: 
+        return -1 #Indicates no ratings in common 
+
+#print(manhattan(users['Bilbo'], users['David G']))
+
+def computeNearestNeighbor(username, users): 
+    distances = [] 
+    for user in users: 
+        if user != username: 
+            distance = manhattan(users[user], users[username]) 
+           # if distance > 0:#iu
+            distances.append((distance, user)) 
+# sort based on distance -- closest first 
+    distances.sort() 
+    return distances 
+    
+#print(computeNearestNeighbor("Bilbo", users))
+
+def recommend(username, users): 
+# first find nearest neighbor 
+    nearest = computeNearestNeighbor(username, users)[0][1] 
+    recommendations = [] 
+    # now find bands neighbor rated that user didn't 
+    neighborRatings = users[nearest] 
+    userRatings = users[username] 
+    for product in neighborRatings: 
+        if not product in userRatings: 
+            recommendations.append((product, neighborRatings[product])) 
+# using the fn sorted for variety - sort is more efficient 
+    return sorted(recommendations, key=lambda productTuple: productTuple[1], reverse = True) 
+    
+
+print( recommend('Bilbo', users))
